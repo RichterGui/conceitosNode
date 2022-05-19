@@ -1,21 +1,48 @@
 const express = require('express');
 const cors = require('cors');
 
-// const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// const users = [];
+const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
-}
+  const {user} = request.headers;
 
-app.post('/users', (request, response) => {
+  const human = users.find(verify => verify.user === user);
+
+  if(!human) {
+    return response.status(400).json({error: "error not found"})
+  }
+
+  request.verify = human;
+
+  return next();
+
+}
   // Complete aqui
+app.post('/users', (request, response) => {
+      const { name, username } = request.body;
+
+      const userAlreadyCreated = users.some(
+          (users) => users.name === name);
+
+      if(userAlreadyCreated){
+        return response.status(400).json({error: "User Already Created"})
+      }
+
+      const id = uuid();
+      
+      users.push({
+        id,
+        name,
+        username,
+        todos: []
+      })
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
